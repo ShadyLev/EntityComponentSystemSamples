@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8914837855844127399}
   - component: {fileID: 4664587144886439117}
   - component: {fileID: 2081943310024832465}
+  - component: {fileID: 2328247724223595021}
   - component: {fileID: 8149117776063509769}
   m_Layer: 0
   m_Name: FuelBarrel
@@ -84,6 +85,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2328247724223595021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6885945156333850466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ff735002e79c2049bbac21b76a41e43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _fuelAddAmount: 20
 --- !u!114 &8149117776063509769
 MonoBehaviour:
   m_ObjectHideFlags: 0

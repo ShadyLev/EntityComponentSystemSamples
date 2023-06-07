@@ -27,6 +27,10 @@ public class DisplayFuelAmount : MonoBehaviour
     {
         _fuelEntity = _entityManager.CreateEntityQuery(typeof(RaycastCar.ActiveVehicle)).GetSingletonEntity();
 
+        if (!_entityManager.HasComponent<RaycastCar.VehicleFuel>(_fuelEntity))
+        {
+            return;
+        }
 
         var currentFuelAmount = _entityManager.GetComponentData<RaycastCar.VehicleFuel>(_fuelEntity).CurrentFuel;
         var maxFuelAmount = _entityManager.GetComponentData<RaycastCar.VehicleFuel>(_fuelEntity).MaxFuel;

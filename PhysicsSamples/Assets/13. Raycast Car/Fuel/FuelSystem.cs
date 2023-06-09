@@ -22,6 +22,7 @@ namespace RaycastCar
             
         }
 
+        /*
         public void AddFuel(ref SystemState state, float amount)
         {
             var activeVehicleQuery = SystemAPI.QueryBuilder().WithAll<ActiveVehicle, Vehicle>().Build();
@@ -51,6 +52,7 @@ namespace RaycastCar
                 });
             }
         }
+        */
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)

@@ -15,13 +15,12 @@ namespace RaycastCar
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new FuelBarrelAdder()
                 {
-                    FuelAddAmount = authoring._fuelAddAmount
+                    FuelAddAmount = authoring._fuelAddAmount,
+                    AddFuel = false,
+                    addingEntity = Entity.Null
                 });
 
-                AddComponent(entity, new FuelBarrel
-                {
-                    Barrel = GetEntity(authoring.barrel , TransformUsageFlags.Dynamic)
-                });
+                AddComponent<FuelBarrel>(entity);
             }
         }
     }
@@ -29,11 +28,12 @@ namespace RaycastCar
     public struct FuelBarrelAdder : IComponentData
     {
         public float FuelAddAmount;
+        public bool AddFuel;
+        public Entity addingEntity;
     }
 
     public struct FuelBarrel : IComponentData
     {
-        public Entity Barrel;
     }
 
 

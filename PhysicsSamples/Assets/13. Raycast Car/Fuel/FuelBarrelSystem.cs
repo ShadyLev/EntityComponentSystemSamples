@@ -4,7 +4,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Entities;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace RaycastCar
@@ -24,37 +24,6 @@ namespace RaycastCar
 
         }
 
-        public void AddFuel(ref SystemState state, float amount)
-        {
-            var activeVehicleQuery = SystemAPI.QueryBuilder().WithAll<ActiveVehicle, Vehicle>().Build();
-
-            var activeVehicle = Entity.Null;
-            if (activeVehicleQuery.CalculateEntityCount() == 1)
-            {
-                activeVehicle = activeVehicleQuery.GetSingletonEntity();
-            }
-            else
-            {
-                return;
-            }
-
-            if (SystemAPI.HasComponent<VehicleFuel>(activeVehicle))
-            {
-                var vehicleFuel = SystemAPI.GetComponent<VehicleFuel>(activeVehicle);
-                float newFuelAmount = vehicleFuel.CurrentFuel + amount;
-
-                newFuelAmount = Mathf.Clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
-
-                SystemAPI.SetComponent<VehicleFuel>(activeVehicle, new VehicleFuel
-                {
-                    MaxFuel = vehicleFuel.MaxFuel,
-                    CurrentFuel = newFuelAmount,
-                    FuelDecreaseRatio = vehicleFuel.FuelDecreaseRatio
-                });
-
-            }
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -68,37 +37,71 @@ namespace RaycastCar
             }
             else
             {
-                // If there is no active car do nothing
+                Debug.Log("No active car in the world");
                 return;
             }
 
             if (activeBarrelsQuery.CalculateEntityCount() == 0)
-                return;
-
-            foreach (var (fueladd, barrel, entity) in SystemAPI.Query<RefRO<FuelBarrelAdder>, RefRO<FuelBarrel>>().WithEntityAccess())
             {
-                float3 vehiclePos = state.EntityManager.GetComponentData<LocalToWorld>(activeVehicle).Position;
+                Debug.Log("No Barrels in the world");
+                return;
+            }
 
-                Entity ce = barrel.ValueRO.Barrel;
-                if (ce == Entity.Null)
+            LocalToWorld carPosition = state.EntityManager.GetComponentData<LocalToWorld>(activeVehicle);
+            VehicleFuel carFuelComponent = state.EntityManager.GetComponentData<VehicleFuel>(activeVehicle);
+
+            var barrelEntities = activeBarrelsQuery.ToEntityArray(Allocator.TempJob);
+
+            for(int i=0; i < barrelEntities.Length; i++)
+            {
+                var barrelEntity = barrelEntities[i];
+                var barrelComponent = state.EntityManager.GetComponentData<FuelBarrelAdder>(barrelEntity);
+
+                LocalToWorld barrelPos = state.EntityManager.GetComponentData<LocalToWorld>(barrelEntity);
+
+                float distance = math.distance(carPosition.Position, barrelPos.Position);
+
+                if(distance < 5f)
                 {
-                    return;
-                }
+                    float newFuelAmount = carFuelComponent.CurrentFuel + barrelComponent.FuelAddAmount;
 
-                float3 barrelPos = state.EntityManager.GetComponentData<LocalToWorld>(ce).Position;
+                    newFuelAmount = Mathf.Clamp(newFuelAmount, 0, carFuelComponent.MaxFuel);
 
-                float distance = Vector3.Distance(vehiclePos, barrelPos);
+                    state.EntityManager.SetComponentData<VehicleFuel>(activeVehicle, new VehicleFuel
+                    {
+                        MaxFuel = carFuelComponent.MaxFuel,
+                        CurrentFuel = newFuelAmount,
+                        FuelDecreaseRatio = carFuelComponent.FuelDecreaseRatio
+                    });
 
-                if(distance < 15f)
-                {
-                    //add fuel
-                    AddFuel(ref state, fueladd.ValueRO.FuelAddAmount);
-                    state.EntityManager.DestroyEntity(ce);
+                    state.EntityManager.DestroyEntity(barrelEntity);
                 }
-                else
-                {
-                    return;
-                }
+            }
+
+            barrelEntities.Dispose();
+        }
+
+        public partial struct GetDistancesJob : IJobEntity
+        {
+            public LocalToWorld position;
+            public float pickUpRange;
+
+            public void Execute(FuelBarrelAspect fuelBarrelAspect)
+            {
+                fuelBarrelAspect.IsInPickUpRange(position, pickUpRange);
+            }
+        }
+
+        public partial struct AddFuelJob : IJobEntity
+        {
+            public Entity activeVehicle;
+            public float currentFuel;
+            public float maxFuel;
+            public float fuelDecreaseRatio;
+
+            public void Execute(FuelBarrelAspect fuelBarrelAspect)
+            {
+                fuelBarrelAspect.TestJobTask(activeVehicle, currentFuel, maxFuel, fuelDecreaseRatio);
             }
         }
     }

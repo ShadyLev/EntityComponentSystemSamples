@@ -22,38 +22,6 @@ namespace RaycastCar
             
         }
 
-        /*
-        public void AddFuel(ref SystemState state, float amount)
-        {
-            var activeVehicleQuery = SystemAPI.QueryBuilder().WithAll<ActiveVehicle, Vehicle>().Build();
-
-            var activeVehicle = Entity.Null;
-            if (activeVehicleQuery.CalculateEntityCount() == 1)
-            {
-                activeVehicle = activeVehicleQuery.GetSingletonEntity();
-            }
-            else
-            {
-                return;
-            }
-
-            if (SystemAPI.HasComponent<VehicleFuel>(activeVehicle))
-            {
-                var vehicleFuel = SystemAPI.GetComponent<VehicleFuel>(activeVehicle);
-                float newFuelAmount = vehicleFuel.CurrentFuel + amount;
-
-                newFuelAmount = Mathf.Clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
-
-                SystemAPI.SetComponent<VehicleFuel>(activeVehicle, new VehicleFuel
-                {
-                    MaxFuel = vehicleFuel.MaxFuel,
-                    CurrentFuel = newFuelAmount,
-                    FuelDecreaseRatio = vehicleFuel.FuelDecreaseRatio
-                });
-            }
-        }
-        */
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {

@@ -17,7 +17,7 @@ public class DisplayFuelAmount : MonoBehaviour
     {
         _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
 
         _fuelEntity = _entityManager.CreateEntityQuery(typeof(RaycastCar.ActiveVehicle)).GetSingletonEntity();
     }
@@ -25,7 +25,16 @@ public class DisplayFuelAmount : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        _fuelEntity = _entityManager.CreateEntityQuery(typeof(RaycastCar.ActiveVehicle)).GetSingletonEntity();
+        EntityQuery vehicleQuery = _entityManager.CreateEntityQuery(typeof(RaycastCar.ActiveVehicle));
+
+        if (!vehicleQuery.IsEmpty)
+        {
+            _fuelEntity = vehicleQuery.GetSingletonEntity();
+        }
+        else
+        {
+            return;
+        }
 
         if (!_entityManager.HasComponent<RaycastCar.VehicleFuel>(_fuelEntity))
         {

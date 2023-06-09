@@ -13,13 +13,13 @@ namespace RaycastCar
     public partial struct FuelBarrelSystem : ISystem
     {
         private ComponentLookup<LocalToWorld> posLookup;
-        private ComponentLookup<FuelBarrelAdder> fuelAdderLookup;
+        private ComponentLookup<FuelBarrelData> fuelBarrelDataLookup;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             posLookup = state.GetComponentLookup<LocalToWorld>(true);
-            fuelAdderLookup = state.GetComponentLookup<FuelBarrelAdder>(false);
+            fuelBarrelDataLookup = state.GetComponentLookup<FuelBarrelData>(false);
         }
 
         [BurstCompile]
@@ -58,15 +58,15 @@ namespace RaycastCar
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
             posLookup.Update(ref state);
-            fuelAdderLookup.Update(ref state);
+            fuelBarrelDataLookup.Update(ref state);
 
             var addFuelJob = new AddFuelJob
             {
                 activeVehicle = activeVehicle,
                 positionLookup = posLookup,
-                fuelAdderLookup = fuelAdderLookup,
+                fuelBarrelDataLookup = fuelBarrelDataLookup,
                 vehicleFuel = carFuelComponent,
-                Ecb = ecb.AsParallelWriter()
+                ecb = ecb.AsParallelWriter()
             };
 
             state.Dependency = addFuelJob.Schedule(state.Dependency);
@@ -110,9 +110,9 @@ namespace RaycastCar
         {
             [ReadOnly] public Entity activeVehicle;
             [ReadOnly] public ComponentLookup<LocalToWorld> positionLookup;
-            [ReadOnly] public ComponentLookup<FuelBarrelAdder> fuelAdderLookup;
+            [ReadOnly] public ComponentLookup<FuelBarrelData> fuelBarrelDataLookup;
             public VehicleFuel vehicleFuel;
-            public EntityCommandBuffer.ParallelWriter Ecb;
+            public EntityCommandBuffer.ParallelWriter ecb;
 
             [BurstCompile]
             public void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity)
@@ -122,19 +122,22 @@ namespace RaycastCar
 
                 float distance = math.distance(barrelPos, vehiclePos);
 
-                if(distance < 5f)
+                if(distance <= fuelBarrelDataLookup[entity].TriggerRange)
                 {
-                    float newFuelAmount = vehicleFuel.CurrentFuel + fuelAdderLookup[entity].FuelAddAmount;
+                    float newFuelAmount = vehicleFuel.CurrentFuel + fuelBarrelDataLookup[entity].FuelAddAmount;
+
+                    newFuelAmount = math.clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
+
                     float maxFuel = vehicleFuel.MaxFuel;
                     float fuelRatio = vehicleFuel.FuelDecreaseRatio;
 
-                    Ecb.SetComponent<VehicleFuel>(chunkIndex, activeVehicle, new VehicleFuel {
+                    ecb.SetComponent<VehicleFuel>(chunkIndex, activeVehicle, new VehicleFuel {
                         CurrentFuel = newFuelAmount,
                         MaxFuel = maxFuel,
                         FuelDecreaseRatio = fuelRatio
                     });
 
-                    Ecb.DestroyEntity(chunkIndex, entity);
+                    ecb.DestroyEntity(chunkIndex, entity);
                 }
 
             }

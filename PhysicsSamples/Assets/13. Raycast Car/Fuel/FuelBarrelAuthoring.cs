@@ -6,6 +6,7 @@ namespace RaycastCar
     public class FuelBarrelAuthoring : MonoBehaviour
     {
         public float _fuelAddAmount;
+        public float _pickUpTriggerRange;
         public GameObject barrel;
 
         class Baker : Baker<FuelBarrelAuthoring>
@@ -13,23 +14,28 @@ namespace RaycastCar
             public override void Bake(FuelBarrelAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent(entity, new FuelBarrelAdder()
+                AddComponent(entity, new FuelBarrelData()
                 {
                     FuelAddAmount = authoring._fuelAddAmount,
-                    AddFuel = false,
-                    addingEntity = Entity.Null
+                    TriggerRange = authoring._pickUpTriggerRange
                 });
 
                 AddComponent<FuelBarrel>(entity);
             }
         }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+
+            Gizmos.DrawWireSphere(transform.position, _pickUpTriggerRange);
+        }
     }
 
-    public struct FuelBarrelAdder : IComponentData
+    public struct FuelBarrelData : IComponentData
     {
         public float FuelAddAmount;
-        public bool AddFuel;
-        public Entity addingEntity;
+        public float TriggerRange;
     }
 
     public struct FuelBarrel : IComponentData

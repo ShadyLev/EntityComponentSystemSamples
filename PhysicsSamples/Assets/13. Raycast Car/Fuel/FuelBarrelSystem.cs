@@ -12,10 +12,14 @@ namespace RaycastCar
     [BurstCompile]
     public partial struct FuelBarrelSystem : ISystem
     {
+        private ComponentLookup<LocalToWorld> posLookup;
+        private ComponentLookup<FuelBarrelAdder> fuelAdderLookup;
+
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-
+            posLookup = state.GetComponentLookup<LocalToWorld>(true);
+            fuelAdderLookup = state.GetComponentLookup<FuelBarrelAdder>(false);
         }
 
         [BurstCompile]
@@ -50,6 +54,24 @@ namespace RaycastCar
             LocalToWorld carPosition = state.EntityManager.GetComponentData<LocalToWorld>(activeVehicle);
             VehicleFuel carFuelComponent = state.EntityManager.GetComponentData<VehicleFuel>(activeVehicle);
 
+            var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+
+            posLookup.Update(ref state);
+            fuelAdderLookup.Update(ref state);
+
+            var addFuelJob = new AddFuelJob
+            {
+                activeVehicle = activeVehicle,
+                positionLookup = posLookup,
+                fuelAdderLookup = fuelAdderLookup,
+                vehicleFuel = carFuelComponent,
+                Ecb = ecb.AsParallelWriter()
+            };
+
+            state.Dependency = addFuelJob.Schedule(state.Dependency);
+
+            /*
             var barrelEntities = activeBarrelsQuery.ToEntityArray(Allocator.TempJob);
 
             for(int i=0; i < barrelEntities.Length; i++)
@@ -79,29 +101,42 @@ namespace RaycastCar
             }
 
             barrelEntities.Dispose();
+            */
         }
 
-        public partial struct GetDistancesJob : IJobEntity
-        {
-            public LocalToWorld position;
-            public float pickUpRange;
-
-            public void Execute(FuelBarrelAspect fuelBarrelAspect)
-            {
-                fuelBarrelAspect.IsInPickUpRange(position, pickUpRange);
-            }
-        }
-
+        [WithAll(typeof(FuelBarrel))]
+        [BurstCompile]
         public partial struct AddFuelJob : IJobEntity
         {
-            public Entity activeVehicle;
-            public float currentFuel;
-            public float maxFuel;
-            public float fuelDecreaseRatio;
+            [ReadOnly] public Entity activeVehicle;
+            [ReadOnly] public ComponentLookup<LocalToWorld> positionLookup;
+            [ReadOnly] public ComponentLookup<FuelBarrelAdder> fuelAdderLookup;
+            public VehicleFuel vehicleFuel;
+            public EntityCommandBuffer.ParallelWriter Ecb;
 
-            public void Execute(FuelBarrelAspect fuelBarrelAspect)
+            [BurstCompile]
+            public void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity)
             {
-                fuelBarrelAspect.TestJobTask(activeVehicle, currentFuel, maxFuel, fuelDecreaseRatio);
+                float3 barrelPos = positionLookup[entity].Position;
+                float3 vehiclePos = positionLookup[activeVehicle].Position;
+
+                float distance = math.distance(barrelPos, vehiclePos);
+
+                if(distance < 5f)
+                {
+                    float newFuelAmount = vehicleFuel.CurrentFuel + fuelAdderLookup[entity].FuelAddAmount;
+                    float maxFuel = vehicleFuel.MaxFuel;
+                    float fuelRatio = vehicleFuel.FuelDecreaseRatio;
+
+                    Ecb.SetComponent<VehicleFuel>(chunkIndex, activeVehicle, new VehicleFuel {
+                        CurrentFuel = newFuelAmount,
+                        MaxFuel = maxFuel,
+                        FuelDecreaseRatio = fuelRatio
+                    });
+
+                    Ecb.DestroyEntity(chunkIndex, entity);
+                }
+
             }
         }
     }

@@ -13,6 +13,11 @@ namespace RaycastCar
         private readonly RefRO<LocalTransform> localTransform;
         private readonly RefRW<RaycastCar.FuelBarrelAdder> fuelAdder;
 
+        public float GetFuelAddAmount()
+        {
+            return fuelAdder.ValueRO.FuelAddAmount;
+        }
+
         public void IsInPickUpRange(LocalToWorld carPosition, float range)
         {
             float distance = math.distance(carPosition.Position, localTransform.ValueRO.Position);

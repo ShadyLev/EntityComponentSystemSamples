@@ -24,7 +24,7 @@ namespace RaycastCar
             }
         }
     }
-    struct VehicleFuel : IComponentData
+    public struct VehicleFuel : IComponentData
     {
         public float MaxFuel;
         public float CurrentFuel;

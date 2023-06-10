@@ -90,7 +90,7 @@ namespace RaycastCar
 
                 float distance = math.distance(barrelPos, vehiclePos);
 
-                if(distance <= fuelBarrelDataLookup[entity].TriggerRange)
+                if(distance <= vehicleFuel.FuelPickupRange)
                 {
                     float newFuelAmount = vehicleFuel.CurrentFuel + fuelBarrelDataLookup[entity].FuelAddAmount;
                     newFuelAmount = math.clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
@@ -99,7 +99,8 @@ namespace RaycastCar
                         CurrentFuel = newFuelAmount,
                         MaxFuel = vehicleFuel.MaxFuel,
                         FuelUsageAmount = vehicleFuel.FuelUsageAmount,
-                        SpeedDecrease = vehicleFuel.SpeedDecrease
+                        SpeedDecrease = vehicleFuel.SpeedDecrease,
+                        FuelPickupRange = vehicleFuel.FuelPickupRange
                     });
 
                     ecb.DestroyEntity(chunkIndex, entity);

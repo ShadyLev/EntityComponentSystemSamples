@@ -123,7 +123,9 @@ namespace RaycastCar
                 {
                     MaxFuel = fuel.MaxFuel,
                     CurrentFuel = newCurrentFuel,
-                    FuelUsageAmount = fuel.FuelUsageAmount
+                    FuelUsageAmount = fuel.FuelUsageAmount,
+                    SpeedDecrease = fuel.SpeedDecrease,
+                    FuelPickupRange = fuel.FuelPickupRange
                 });
             }
 

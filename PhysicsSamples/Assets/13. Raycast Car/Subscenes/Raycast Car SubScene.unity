@@ -221,6 +221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxFuel: 100
   FuelUsageAmount: 10
+  FuelPickupRange: 4.16
   SpeedDecrease: 0.2
 --- !u!1 &243139450
 GameObject:
@@ -1109,6 +1110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxFuel: 100
   FuelUsageAmount: 10
+  FuelPickupRange: 3.39
   SpeedDecrease: 0.2
 --- !u!1 &1933741508
 GameObject:
@@ -1237,6 +1239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxFuel: 100
   FuelUsageAmount: 10
+  FuelPickupRange: 4.12
   SpeedDecrease: 0.2
 --- !u!1 &1991987370
 GameObject:

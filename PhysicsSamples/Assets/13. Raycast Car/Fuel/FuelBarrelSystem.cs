@@ -51,7 +51,7 @@ namespace RaycastCar
                 return;
             }
 
-            LocalToWorld carPosition = state.EntityManager.GetComponentData<LocalToWorld>(activeVehicle);
+            // Get data for the job
             VehicleFuel carFuelComponent = state.EntityManager.GetComponentData<VehicleFuel>(activeVehicle);
 
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
@@ -70,38 +70,6 @@ namespace RaycastCar
             };
 
             state.Dependency = addFuelJob.Schedule(state.Dependency);
-
-            /*
-            var barrelEntities = activeBarrelsQuery.ToEntityArray(Allocator.TempJob);
-
-            for(int i=0; i < barrelEntities.Length; i++)
-            {
-                var barrelEntity = barrelEntities[i];
-                var barrelComponent = state.EntityManager.GetComponentData<FuelBarrelAdder>(barrelEntity);
-
-                LocalToWorld barrelPos = state.EntityManager.GetComponentData<LocalToWorld>(barrelEntity);
-
-                float distance = math.distance(carPosition.Position, barrelPos.Position);
-
-                if(distance < 5f)
-                {
-                    float newFuelAmount = carFuelComponent.CurrentFuel + barrelComponent.FuelAddAmount;
-
-                    newFuelAmount = Mathf.Clamp(newFuelAmount, 0, carFuelComponent.MaxFuel);
-
-                    state.EntityManager.SetComponentData<VehicleFuel>(activeVehicle, new VehicleFuel
-                    {
-                        MaxFuel = carFuelComponent.MaxFuel,
-                        CurrentFuel = newFuelAmount,
-                        FuelDecreaseRatio = carFuelComponent.FuelDecreaseRatio
-                    });
-
-                    state.EntityManager.DestroyEntity(barrelEntity);
-                }
-            }
-
-            barrelEntities.Dispose();
-            */
         }
 
         [WithAll(typeof(FuelBarrel))]
@@ -125,21 +93,17 @@ namespace RaycastCar
                 if(distance <= fuelBarrelDataLookup[entity].TriggerRange)
                 {
                     float newFuelAmount = vehicleFuel.CurrentFuel + fuelBarrelDataLookup[entity].FuelAddAmount;
-
                     newFuelAmount = math.clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
-
-                    float maxFuel = vehicleFuel.MaxFuel;
-                    float fuelRatio = vehicleFuel.FuelDecreaseRatio;
 
                     ecb.SetComponent<VehicleFuel>(chunkIndex, activeVehicle, new VehicleFuel {
                         CurrentFuel = newFuelAmount,
-                        MaxFuel = maxFuel,
-                        FuelDecreaseRatio = fuelRatio
+                        MaxFuel = vehicleFuel.MaxFuel,
+                        FuelUsageAmount = vehicleFuel.FuelUsageAmount,
+                        SpeedDecrease = vehicleFuel.SpeedDecrease
                     });
 
                     ecb.DestroyEntity(chunkIndex, entity);
                 }
-
             }
         }
     }

@@ -98,9 +98,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ff735002e79c2049bbac21b76a41e43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fuelAddAmount: 30
+  _fuelAddAmount: 50
   _pickUpTriggerRange: 2
-  barrel: {fileID: 6885945156333850466}
 --- !u!114 &8149117776063509769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,7 +149,7 @@ MonoBehaviour:
     m_Template: {fileID: 0}
     m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 254
     m_Friction:
       m_Override: 0
       m_Value:
@@ -257,7 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MotionType: 0
-  m_Smoothing: 1
+  m_Smoothing: 0
   m_Mass: 20
   m_LinearDamping: 0.01
   m_AngularDamping: 0.05

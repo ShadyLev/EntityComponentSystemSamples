@@ -7,7 +7,6 @@ namespace RaycastCar
     {
         public float _fuelAddAmount;
         public float _pickUpTriggerRange;
-        public GameObject barrel;
 
         class Baker : Baker<FuelBarrelAuthoring>
         {

@@ -7,7 +7,8 @@ namespace RaycastCar
     public class FuelAuthoring : MonoBehaviour
     {
         public float MaxFuel = 100f;
-        public float FuelDecreaseRatio = 10f;
+        public float FuelUsageAmount = 10f;
+        public float SpeedDecrease = 0.2f;
 
         class FuelBaker : Baker<FuelAuthoring>
         {
@@ -19,7 +20,8 @@ namespace RaycastCar
                 {
                     MaxFuel = authoring.MaxFuel,
                     CurrentFuel = authoring.MaxFuel,
-                    FuelDecreaseRatio = authoring.FuelDecreaseRatio
+                    FuelUsageAmount = authoring.FuelUsageAmount,
+                    SpeedDecrease = authoring.SpeedDecrease
                 });
             }
         }
@@ -28,7 +30,8 @@ namespace RaycastCar
     {
         public float MaxFuel;
         public float CurrentFuel;
-        public float FuelDecreaseRatio;
+        public float FuelUsageAmount;
+        public float SpeedDecrease;
     }
 
     struct DisableVehicle : IComponentData

@@ -142,6 +142,11 @@ PrefabInstance:
       propertyPath: _fuelAddAmount
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 2328247724223595021, guid: 68639d89aa845fc4caf9293614997363,
+        type: 3}
+      propertyPath: _pickUpTriggerRange
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6885945156333850466, guid: 68639d89aa845fc4caf9293614997363,
         type: 3}
       propertyPath: m_Name
@@ -1380,6 +1385,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _fuelAddAmount
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2328247724223595021, guid: 68639d89aa845fc4caf9293614997363,
+        type: 3}
+      propertyPath: _pickUpTriggerRange
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6885945156333850466, guid: 68639d89aa845fc4caf9293614997363,
         type: 3}

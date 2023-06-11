@@ -13,13 +13,11 @@ namespace RaycastCar
     public partial struct FuelBarrelSystem : ISystem
     {
         private ComponentLookup<LocalToWorld> posLookup;
-        private ComponentLookup<FuelBarrelData> fuelBarrelDataLookup;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             posLookup = state.GetComponentLookup<LocalToWorld>(true);
-            fuelBarrelDataLookup = state.GetComponentLookup<FuelBarrelData>(false);
         }
 
         [BurstCompile]
@@ -41,13 +39,11 @@ namespace RaycastCar
             }
             else
             {
-                Debug.Log("No active car in the world");
                 return;
             }
 
             if (activeBarrelsQuery.CalculateEntityCount() == 0)
             {
-                Debug.Log("No Barrels in the world");
                 return;
             }
 
@@ -58,13 +54,11 @@ namespace RaycastCar
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
             posLookup.Update(ref state);
-            fuelBarrelDataLookup.Update(ref state);
 
             var addFuelJob = new AddFuelJob
             {
                 activeVehicle = activeVehicle,
                 positionLookup = posLookup,
-                fuelBarrelDataLookup = fuelBarrelDataLookup,
                 vehicleFuel = carFuelComponent,
                 ecb = ecb.AsParallelWriter()
             };
@@ -78,12 +72,11 @@ namespace RaycastCar
         {
             [ReadOnly] public Entity activeVehicle;
             [ReadOnly] public ComponentLookup<LocalToWorld> positionLookup;
-            [ReadOnly] public ComponentLookup<FuelBarrelData> fuelBarrelDataLookup;
             public VehicleFuel vehicleFuel;
             public EntityCommandBuffer.ParallelWriter ecb;
 
             [BurstCompile]
-            public void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity)
+            public void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, in FuelBarrelData fuelData)
             {
                 float3 barrelPos = positionLookup[entity].Position;
                 float3 vehiclePos = positionLookup[activeVehicle].Position;
@@ -92,7 +85,7 @@ namespace RaycastCar
 
                 if(distance <= vehicleFuel.FuelPickupRange)
                 {
-                    float newFuelAmount = vehicleFuel.CurrentFuel + fuelBarrelDataLookup[entity].FuelAddAmount;
+                    float newFuelAmount = vehicleFuel.CurrentFuel + fuelData.FuelAddAmount;
                     newFuelAmount = math.clamp(newFuelAmount, 0, vehicleFuel.MaxFuel);
 
                     ecb.SetComponent<VehicleFuel>(chunkIndex, activeVehicle, new VehicleFuel {

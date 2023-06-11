@@ -35,7 +35,7 @@ namespace RaycastCar
                 return;
             }
 
-            var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
             float deltaTime = SystemAPI.Time.DeltaTime;
@@ -47,54 +47,6 @@ namespace RaycastCar
             };
 
             state.Dependency = reduceFuelJob.Schedule(state.Dependency);
-
-            /*
-            // Check if active vehicle is moving
-            bool driveEngaged = false;
-            var vehicleSpeed = SystemAPI.GetComponent<VehicleSpeed>(activeVehicle);
-            driveEngaged = vehicleSpeed.DriveEngaged != 0;
-
-
-            float currentFuel;
-            if (driveEngaged)
-            {
-                var vehicleFuel = SystemAPI.GetComponent<VehicleFuel>(activeVehicle);
-                currentFuel = vehicleFuel.CurrentFuel;
-
-                currentFuel -= vehicleFuel.FuelDecreaseRatio * SystemAPI.Time.DeltaTime;
-                currentFuel = Mathf.Clamp(currentFuel, 0, vehicleFuel.MaxFuel);
-
-                if (currentFuel <= 0)
-                {
-                    var speed = SystemAPI.GetComponent<VehicleSpeed>(activeVehicle);
-                    float newDesiredSpeed = 0;
-
-                    if (speed.DesiredSpeed > 0)
-                    {
-                        newDesiredSpeed = speed.DesiredSpeed - 0.2f;
-                    }else if(speed.DesiredSpeed <= 0)
-                    {
-                        newDesiredSpeed = 0;
-                    }
-
-                    // Set new speed
-                    SystemAPI.SetComponent<VehicleSpeed>(activeVehicle, new VehicleSpeed {
-                        TopSpeed = speed.TopSpeed,
-                        DesiredSpeed = newDesiredSpeed,
-                        Damping = speed.Damping,
-                        DriveEngaged = 0,
-                    });
-                }
-
-                // Set new fuel
-                SystemAPI.SetComponent<VehicleFuel>(activeVehicle, new VehicleFuel
-                {
-                    MaxFuel = vehicleFuel.MaxFuel,
-                    CurrentFuel = currentFuel,
-                    FuelDecreaseRatio = vehicleFuel.FuelDecreaseRatio
-                });
-            }
-            */
         }
     }
 

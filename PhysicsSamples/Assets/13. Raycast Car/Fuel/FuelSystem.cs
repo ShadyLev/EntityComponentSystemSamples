@@ -35,14 +35,10 @@ namespace RaycastCar
                 return;
             }
 
-            var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
             float deltaTime = SystemAPI.Time.DeltaTime;
 
             var reduceFuelJob = new ReduceFuel
             {
-                ecb = ecb.AsParallelWriter(),
                 deltaTime = deltaTime
             };
 
@@ -53,7 +49,6 @@ namespace RaycastCar
     [WithAll(typeof(ActiveVehicle))]
     partial struct ReduceFuel: IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
         public float deltaTime;
 
         void Execute([ChunkIndexInQuery] int chunkIndex, Entity entity, ref VehicleSpeed speed, ref VehicleFuel fuel)
@@ -68,17 +63,8 @@ namespace RaycastCar
                 newCurrentFuel -= fuel.FuelUsageAmount * deltaTime;
                 newCurrentFuel = Mathf.Clamp(newCurrentFuel, 0, fuel.MaxFuel);
 
-                //fuel.CurrentFuel = newCurrentFuel;
-
-                // Set new fuel
-                ecb.SetComponent<VehicleFuel>(chunkIndex, entity, new VehicleFuel
-                {
-                    MaxFuel = fuel.MaxFuel,
-                    CurrentFuel = newCurrentFuel,
-                    FuelUsageAmount = fuel.FuelUsageAmount,
-                    SpeedDecrease = fuel.SpeedDecrease,
-                    FuelPickupRange = fuel.FuelPickupRange
-                });
+                //Set new fuel
+                fuel.CurrentFuel = newCurrentFuel;
             }
 
             // Stop vehicle if no fuel
@@ -96,13 +82,7 @@ namespace RaycastCar
                 }
 
                 // Set new speed
-                ecb.SetComponent<VehicleSpeed>(chunkIndex, entity, new VehicleSpeed
-                {
-                    TopSpeed = speed.TopSpeed,
-                    DesiredSpeed = newDesiredSpeed,
-                    Damping = speed.Damping,
-                    DriveEngaged = speed.DriveEngaged,
-                });
+                speed.DesiredSpeed = newDesiredSpeed;
             }
         }
     }

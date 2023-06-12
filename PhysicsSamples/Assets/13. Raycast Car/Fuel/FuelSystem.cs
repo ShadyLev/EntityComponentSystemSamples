@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
+using Unity.Mathematics;
 using Unity.Physics.Systems;
 
 namespace RaycastCar
@@ -76,9 +77,9 @@ namespace RaycastCar
                 {
                     newDesiredSpeed = speed.DesiredSpeed - fuel.SpeedDecrease;
                 }
-                else if (speed.DesiredSpeed <= 0)
+                else if (speed.DesiredSpeed < 0)
                 {
-                    newDesiredSpeed = 0;
+                    newDesiredSpeed = speed.DesiredSpeed + fuel.SpeedDecrease;
                 }
 
                 // Set new speed
